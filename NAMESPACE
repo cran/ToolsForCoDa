@@ -1,0 +1,5 @@
+export (canocov, cen, clrmat, tr)
+import (calibrate)
+import (HardyWeinberg)
+importFrom("stats", "cor", "cov")
+importFrom("MASS", "ginv")
