@@ -1,20 +1,19 @@
-citHeader("To cite CoDaCCO in publications use:")
+citHeader("To cite ToolsForCoDa in publications use:")
 
 citEntry(entry = "Article",
-  title        = "Compositional Canonical Correlation Analysis",
-         author       = personList(as.person("Jan Graffelman"),as.person("Vera Pawlowsky-Glahn"),as.person("Juan Jose Egozcue"),
+  title        = "Exploration of geochemical data with compositional canonical biplots",
+  author       = personList(as.person("Jan Graffelman"),as.person("Vera Pawlowsky-Glahn"),as.person("Juan Jose Egozcue"),
                                    as.person("Antonella Buccianti")),
-  journal      = "bioRxiv preprint 10.1101/144584",
-  year         = "2017",
-  volume       = "NA",
-  number       = "NA",
-  pages        = "NA",
-  url          = "NA",
-  doi          = "10.1101/144584",
+  journal      = "Journal of Geochemical Exploration",
+  year         = "2018",
+  volume       = "194",
+  pages        = "120--133",
+  url          = "https://doi.org/10.1016/j.gexplo.2018.07.014",
+  doi          = "10.1016/j.gexplo.2018.07.014",
   textVersion  =
-  paste("Graffelman, J. et al. (2017).",
-        "Compositional Canonical Correlation Analysis",
-        "bioRxiv preprint 10.1101/144584")
+  paste("Graffelman, J. et al. (2018).",
+        "Exploration of geochemical data with compositional canonical biplots",
+        "Journal of Geochemical Exploration 194, pp. 120--133")
 )
 
 

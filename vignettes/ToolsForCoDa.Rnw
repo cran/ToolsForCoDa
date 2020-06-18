@@ -9,7 +9,7 @@
 \usepackage{wasysym}
 
 %% almost as usual
-\author{Jan Graffelman\\Universitat Polit\`ecnica de Catalunya\\version 1.0.0\\ \today}
+\author{Jan Graffelman\\Universitat Polit\`ecnica de Catalunya\\version 1.0.5\\ \today}
 \title{Multivariate tools for compositional data analysis: the \pkg{ToolsForCoDA} package}
 
 %% for pretty printing and a nice hypersummary also set:
@@ -42,7 +42,7 @@
 
 
 \begin{document}
-
+\setkeys{Gin}{width=0.5\textwidth} % should go after begin document
 
 \newcommand{\Real}{ {\mathbb{R}} }        %real numbers/space
 \newcommand{\gm}{ {\mathrm{g_m}} }      %geometric mean
@@ -58,10 +58,10 @@ The \pkg{ToolsForCoDa} package provides some tools for
 the multivariate analysis of compositional data in the \proglang{R}
 environment~\citep{rrr}. The package is available from the Comprehensive \proglang{R} Archive Network (CRAN) at \url{http://CRAN.R-project.org/package=ToolsForCoDa}.\\
 
-This vignette describes the first version 1.0.0 of the package, which mainly provides functions for doing canonical correlation analysis with compositional data.\\
+This vignette describes the first version 1.0.4 of the package, which mainly provides functions for doing canonical correlation analysis with compositional data. The package also includes a function for log-ratio principal component analysis, combined with the calculation of condition indices and condition numbers for subcompositions.\\
 
 The remainder of this vignette shows an \proglang{R} example session showing how
-to analyze two sets of compositions with the functions of the package, using a small artificial data set included in the package.\\
+to perform a canonical analysis of compositions. Two examples will be given. The first example concerns a small artificial data set included in the package, where both the X and Y set are compositional. The second example concerns major oxides compositions of bentonites, where the X set is compositional and Y set is not.\\
 
 \section{An example session for a canonical analysis of compositions}
 \label{sec:session}
@@ -85,19 +85,22 @@ consulted from inside \proglang{R} by typing:
 vignette("ToolsForCoDa")
 @
 
+\subsection{Canonical analysis of two compositions}
+
 In the remainder we show how to perform the canonical analysis described in 
 Section 3.1 of Graffelman et al.~(\citeyear{Graffelman}).\\
 
 We first load two artificial 3-part compositions.
 
 <<echo=TRUE>>=
-library(HardyWeinberg) # needed for making some ternary diagrams
+library(robCompositions) # needed for making some ternary diagrams
 library(ToolsForCoDa)
 data("Artificial")
 Xsim.com <- Artificial$Xsim.com
 Ysim.com <- Artificial$Ysim.com
+colnames(Xsim.com) <- paste("X",1:3,sep="")
+colnames(Ysim.com) <- paste("Y",1:3,sep="")
 @
-
 
 We make the ternary diagrams of the two sets of compositions (Figure 1)
 
@@ -106,16 +109,9 @@ We make the ternary diagrams of the two sets of compositions (Figure 1)
 <<echo=TRUE,fig=TRUE>>=
 opar <- par(mfrow=c(1,2),mar=c(3,3,2,0)+0.5,mgp=c(2,1,0),pty="s")
 par(mfg=c(1,1))
-out <- HWTernaryPlot(Xsim.com,50,region=0,vbounds=FALSE,hwcurve=FALSE,
-                     vertexlab=c(expression(X[1]),
-                                 expression(X[2]),
-                                 expression(X[3])))
+  ternaryDiag(Xsim.com,grid=FALSE)
 par(mfg=c(1,2))
-out <- HWTernaryPlot(Ysim.com,50,region=0,vbounds=FALSE,
-                     hwcurve=FALSE,
-                     vertexlab=c(expression(Y[1]),
-                                 expression(Y[2]),
-                                 expression(Y[3])))
+  ternaryDiag(Ysim.com,grid=FALSE)
 par(opar)
 @
 \end{figure}
@@ -136,6 +132,7 @@ We perform the canonical analysis:
 
 <<echo=TRUE>>=
 res.cco <- canocov(Xsub.clr,Ysub.clr)
+res.cco$ccor
 @
 
 
@@ -174,7 +171,6 @@ The redundancy coefficients of the X set and the Y set
 res.cco$fitXp
 res.cco$fitYp
 @
-
 
 
 Finally, we make the biplots given in Figure 2 of 
@@ -350,6 +346,60 @@ circle()
 par(opar)
 @
 \end{figure}
+\clearpage
+
+
+\subsection{Canonical analysis of bentonites}
+
+In this subsection we treat the canonical analysis of bentonites. The X set concerns the concentrations of 9 major oxides, measured in 14 samples in the US (Cadrin, 1995). The first canonical analysis of this data set has been described by Reyment \& Savazzi (1999), and is extended here with biplots. The Y set concerns two isotopes, $\delta D $ and 
+$\delta 18 O$. 
+
+<<echo=TRUE>>=
+data("bentonites")
+head(bentonites)
+@
+
+We clr-transform and column-center the major oxides, after deletion of MnO which is outlying and had many zeros, which were replaced with 0.001. We standardize the isotopes.
+
+<<echo=TRUE>>=
+X <- bentonites[,1:9]
+X <- X[,-4]
+Y <- scale(bentonites[,10:11])
+Xclr <- clrmat(X)
+cco <- canocov(Xclr,Y)
+@
+
+The two canonical correlations are large:
+
+<<echo=TRUE>>=
+diag(cco$ccor)
+@
+
+We construct a biplot of the data:
+
+
+<<bentobiplot,echo=TRUE,fig=TRUE,include=FALSE>>=
+plot(cco$Fs[,1],cco$Fs[,2],col="red",pch=19,xlab="First principal axis",
+     ylab="Second principal axis",xlim=c(-1,1),ylim=c(-1,1),asp=1)
+textxy(cco$Fs[,1],cco$Fs[,2],colnames(X),cex=0.75)
+points(cco$Gp[,1],cco$Gp[,2],col="blue",pch=19)
+arrows(0,0,cco$Gp[,1],cco$Gp[,2])
+text(cco$Gp[,1],cco$Gp[,2],colnames(Y),pos=c(3,1))
+fa <- 0.45
+points(fa*cco$U[,1],fa*cco$U[,2])
+textxy(fa*cco$U[,1],fa*cco$U[,2],1:14)
+@
+
+We overplot the biplot with the canonical X-variates, which allows one to inspect the original samples~(\cite{GRJAS2005}). For plotting, the canonical variate is scaled 
+with a convenient scaling factor (here \Sexpr{fa}). This factor does not affect the interpretation of the biplot, but gives the samples a convenient spread. 
+
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[keepaspectratio=true,scale=0.1]{ToolsForCoDa-bentobiplot.pdf}
+\end{center}
+\end{figure}
+
 \clearpage
 
 

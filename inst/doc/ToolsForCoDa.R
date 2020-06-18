@@ -1,5 +1,4 @@
 ### R code from vignette source 'ToolsForCoDa.Rnw'
-### Encoding: ISO8859-1
 
 ###################################################
 ### code chunk number 1: ToolsForCoDa.Rnw:71-72
@@ -21,35 +20,30 @@ options(prompt = "R> ", continue = "+ ", width = 70, useFancyQuotes = FALSE)
 
 
 ###################################################
-### code chunk number 4: ToolsForCoDa.Rnw:93-98
+### code chunk number 4: ToolsForCoDa.Rnw:95-102
 ###################################################
-library(HardyWeinberg) # needed for making some ternary diagrams
+library(robCompositions) # needed for making some ternary diagrams
 library(ToolsForCoDa)
 data("Artificial")
 Xsim.com <- Artificial$Xsim.com
 Ysim.com <- Artificial$Ysim.com
+colnames(Xsim.com) <- paste("X",1:3,sep="")
+colnames(Ysim.com) <- paste("Y",1:3,sep="")
 
 
 ###################################################
-### code chunk number 5: ToolsForCoDa.Rnw:106-119
+### code chunk number 5: ToolsForCoDa.Rnw:109-115
 ###################################################
 opar <- par(mfrow=c(1,2),mar=c(3,3,2,0)+0.5,mgp=c(2,1,0),pty="s")
 par(mfg=c(1,1))
-out <- HWTernaryPlot(Xsim.com,50,region=0,vbounds=FALSE,hwcurve=FALSE,
-                     vertexlab=c(expression(X[1]),
-                                 expression(X[2]),
-                                 expression(X[3])))
+  ternaryDiag(Xsim.com,grid=FALSE)
 par(mfg=c(1,2))
-out <- HWTernaryPlot(Ysim.com,50,region=0,vbounds=FALSE,
-                     hwcurve=FALSE,
-                     vertexlab=c(expression(Y[1]),
-                                 expression(Y[2]),
-                                 expression(Y[3])))
+  ternaryDiag(Ysim.com,grid=FALSE)
 par(opar)
 
 
 ###################################################
-### code chunk number 6: ToolsForCoDa.Rnw:128-132
+### code chunk number 6: ToolsForCoDa.Rnw:124-128
 ###################################################
 Xsub.clr <- clrmat(Xsim.com)
 Ysub.clr <- clrmat(Ysim.com)
@@ -58,47 +52,48 @@ colnames(Ysub.clr) <- paste("Y",1:3,sep="")
 
 
 ###################################################
-### code chunk number 7: ToolsForCoDa.Rnw:137-138
+### code chunk number 7: ToolsForCoDa.Rnw:133-135
 ###################################################
 res.cco <- canocov(Xsub.clr,Ysub.clr)
+res.cco$ccor
 
 
 ###################################################
-### code chunk number 8: ToolsForCoDa.Rnw:144-145
+### code chunk number 8: ToolsForCoDa.Rnw:141-142
 ###################################################
 round(diag(res.cco$ccor),digits=3)
 
 
 ###################################################
-### code chunk number 9: ToolsForCoDa.Rnw:150-152
+### code chunk number 9: ToolsForCoDa.Rnw:147-149
 ###################################################
 res.cco$A
 res.cco$B
 
 
 ###################################################
-### code chunk number 10: ToolsForCoDa.Rnw:159-161
+### code chunk number 10: ToolsForCoDa.Rnw:156-158
 ###################################################
 res.cco$Rxu
 res.cco$Ryv
 
 
 ###################################################
-### code chunk number 11: ToolsForCoDa.Rnw:166-168
+### code chunk number 11: ToolsForCoDa.Rnw:163-165
 ###################################################
 res.cco$fitXs
 res.cco$fitYs
 
 
 ###################################################
-### code chunk number 12: ToolsForCoDa.Rnw:173-175
+### code chunk number 12: ToolsForCoDa.Rnw:170-172
 ###################################################
 res.cco$fitXp
 res.cco$fitYp
 
 
 ###################################################
-### code chunk number 13: ToolsForCoDa.Rnw:185-264
+### code chunk number 13: ToolsForCoDa.Rnw:181-260
 ###################################################
 
 opar <- par(mfrow=c(2,2),mar=c(3,3,2,0)+0.5,mgp=c(2,1,0))
@@ -182,7 +177,7 @@ par(opar)
 
 
 ###################################################
-### code chunk number 14: ToolsForCoDa.Rnw:271-350
+### code chunk number 14: ToolsForCoDa.Rnw:267-346
 ###################################################
 
 opar <- par(mfrow=c(2,2),mar=c(3,3,2,0)+0.5,mgp=c(2,1,0))
@@ -263,5 +258,42 @@ fa <- 0.25
 points(fa*res.stan.cco$V[,1],fa*res.stan.cco$V[,2])
 circle()
 par(opar)
+
+
+###################################################
+### code chunk number 15: ToolsForCoDa.Rnw:357-359
+###################################################
+data("bentonites")
+head(bentonites)
+
+
+###################################################
+### code chunk number 16: ToolsForCoDa.Rnw:364-369
+###################################################
+X <- bentonites[,1:9]
+X <- X[,-4]
+Y <- scale(bentonites[,10:11])
+Xclr <- clrmat(X)
+cco <- canocov(Xclr,Y)
+
+
+###################################################
+### code chunk number 17: ToolsForCoDa.Rnw:374-375
+###################################################
+diag(cco$ccor)
+
+
+###################################################
+### code chunk number 18: bentobiplot
+###################################################
+plot(cco$Fs[,1],cco$Fs[,2],col="red",pch=19,xlab="First principal axis",
+     ylab="Second principal axis",xlim=c(-1,1),ylim=c(-1,1),asp=1)
+textxy(cco$Fs[,1],cco$Fs[,2],colnames(X),cex=0.75)
+points(cco$Gp[,1],cco$Gp[,2],col="blue",pch=19)
+arrows(0,0,cco$Gp[,1],cco$Gp[,2])
+text(cco$Gp[,1],cco$Gp[,2],colnames(Y),pos=c(3,1))
+fa <- 0.45
+points(fa*cco$U[,1],fa*cco$U[,2])
+textxy(fa*cco$U[,1],fa*cco$U[,2],1:14)
 
 

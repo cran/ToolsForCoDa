@@ -1,5 +1,6 @@
-export (canocov, cen, clrmat, tr)
+export (canocov, cen, clrmat, tr, largest.kappas, lrpca)
 import (calibrate)
-import (HardyWeinberg)
 importFrom("stats", "cor", "cov")
 importFrom("MASS", "ginv")
+importFrom("utils", "combn")
+importFrom("robCompositions", "ternaryDiag")
