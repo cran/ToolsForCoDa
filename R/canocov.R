@@ -1,7 +1,7 @@
 canocov <- function (X, Y) 
 {
-  Xs <- cen(X)
-  Ys <- cen(Y)
+  Xs <- scale(X,scale=FALSE)
+  Ys <- scale(Y,scale=FALSE)
   Rxx <- cov(X)
   Ryy <- cov(Y)
   Rxy <- cov(X, Y)
@@ -37,7 +37,7 @@ canocov <- function (X, Y)
   fitRxy <- rbind(lamb, frac, cumu)
   
   AdeXcov <- diag(Fs%*%t(Fs))
-  AdeXcovr <- AdeXcov/tr(Rxx)
+  AdeXcovr <- AdeXcov/sum(diag(Rxx))
   fitXc <- rbind(AdeXcov,AdeXcovr)
   
   AdeX <- apply(Rxu * Rxu, 2, mean)

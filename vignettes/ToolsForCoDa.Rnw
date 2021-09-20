@@ -9,7 +9,7 @@
 \usepackage{wasysym}
 
 %% almost as usual
-\author{Jan Graffelman\\Universitat Polit\`ecnica de Catalunya\\version 1.0.5\\ \today}
+\author{Jan Graffelman\\Universitat Polit\`ecnica de Catalunya\\version 1.0.6\\ \today}
 \title{Multivariate tools for compositional data analysis: the \pkg{ToolsForCoDA} package}
 
 %% for pretty printing and a nice hypersummary also set:
@@ -93,7 +93,7 @@ Section 3.1 of Graffelman et al.~(\citeyear{Graffelman}).\\
 We first load two artificial 3-part compositions.
 
 <<echo=TRUE>>=
-library(robCompositions) # needed for making some ternary diagrams
+library(HardyWeinberg) # needed for making some ternary diagrams
 library(ToolsForCoDa)
 data("Artificial")
 Xsim.com <- Artificial$Xsim.com
@@ -109,9 +109,9 @@ We make the ternary diagrams of the two sets of compositions (Figure 1)
 <<echo=TRUE,fig=TRUE>>=
 opar <- par(mfrow=c(1,2),mar=c(3,3,2,0)+0.5,mgp=c(2,1,0),pty="s")
 par(mfg=c(1,1))
-  ternaryDiag(Xsim.com,grid=FALSE)
+  HWTernaryPlot(Xsim.com,n=100,region=0,hwcurve=FALSE,vbounds=FALSE)
 par(mfg=c(1,2))
-  ternaryDiag(Ysim.com,grid=FALSE)
+  HWTernaryPlot(Ysim.com,n=100,region=0,hwcurve=FALSE,vbounds=FALSE)
 par(opar)
 @
 \end{figure}

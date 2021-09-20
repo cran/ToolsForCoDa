@@ -22,7 +22,7 @@ options(prompt = "R> ", continue = "+ ", width = 70, useFancyQuotes = FALSE)
 ###################################################
 ### code chunk number 4: ToolsForCoDa.Rnw:95-102
 ###################################################
-library(robCompositions) # needed for making some ternary diagrams
+library(HardyWeinberg) # needed for making some ternary diagrams
 library(ToolsForCoDa)
 data("Artificial")
 Xsim.com <- Artificial$Xsim.com
@@ -36,9 +36,9 @@ colnames(Ysim.com) <- paste("Y",1:3,sep="")
 ###################################################
 opar <- par(mfrow=c(1,2),mar=c(3,3,2,0)+0.5,mgp=c(2,1,0),pty="s")
 par(mfg=c(1,1))
-  ternaryDiag(Xsim.com,grid=FALSE)
+  HWTernaryPlot(Xsim.com,n=100,region=0,hwcurve=FALSE,vbounds=FALSE)
 par(mfg=c(1,2))
-  ternaryDiag(Ysim.com,grid=FALSE)
+  HWTernaryPlot(Ysim.com,n=100,region=0,hwcurve=FALSE,vbounds=FALSE)
 par(opar)
 
 
