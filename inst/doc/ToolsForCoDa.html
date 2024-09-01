@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Jan Graffelman - Dpt. of Statistics, Universitat Politecnica de Catalunya; Dpt. of Biostatistics, University of Washington" />
+
+<meta name="date" content="2024-09-01" />
+
+<title>Multivariate tools for compositional data analysis: the ToolsForCoDA package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Multivariate tools for compositional data
+analysis: the ToolsForCoDA package</h1>
+<h4 class="author">Jan Graffelman - Dpt. of Statistics, Universitat
+Politecnica de Catalunya; Dpt. of Biostatistics, University of
+Washington</h4>
+<h4 class="date">2024-09-01</h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<div style="text-align: justify">
+<p>The <strong>ToolsForCoDa</strong> package was originally created in
+order to provide functions for a canonical correlation analysis with
+compositional data (<span class="citation">Graffelman et al.
+(2018)</span>), based on the centred logratio (clr) transformation of
+the compositions. Posteriorly, it has been extended with additional
+tools for the multivariate analysis of compositional data in the R
+environment. Currently, this package (version 1.0.9) provides
+functionality for</p>
+<ul>
+<li>log-ratio principal component analysis (LR-PCA).</li>
+<li>log-ratio canonical correlation analysis (LR-CCO).</li>
+<li>log-ratio discriminant analysis (LR-LDA).</li>
+</ul>
+<p>Both CCO and LDA rely on the inversion of a covariance matrix. The
+covariance matrix of the clr transformed compostions is structurally
+singular. The programs <code>lrcco</code> and <code>lrlda</code> resolve
+this with the use of a generalized inverse. Functionality for the
+analysis of compositional data in the R environment can be found in the
+packages <strong>compositions</strong> (<span class="citation">Boogaart,
+Tolosana-Delgado, and Bren (2024)</span>),
+<strong>robCompositions</strong> (<span class="citation">Templ, Hron,
+and Filzmoser (2024)</span>), <strong>easyCODA</strong> (<span class="citation">Greenacre (2024)</span>) and
+<strong>zCompositions</strong> (<span class="citation">Palarea-Albaladejo and Martin-Fernandez (2024)</span>).
+For further reading on compositional data, see the seminal text on
+compositional data by Aitchison (<span class="citation">Aitchison
+(1986)</span>) and several recent statistical textbooks (<span class="citation">Pawlowsky-Glahn, Egozcue, and Tolosana-Delgado
+(2015)</span>, <span class="citation">Filzmoser, Hron, and Templ
+(2018)</span>, <span class="citation">Greenacre (2018)</span>, <span class="citation">Boogaart and Tolosana-Delgado (2013)</span>).</p>
+<p>The remainder of this vignette shows an example session showing how
+to perform the three aforementioned types of analysis.</p>
+<ol style="list-style-type: decimal">
+<li><p><a href="#installation">Installation</a></p></li>
+<li><p><a href="#lrpca">LR-PCA</a></p></li>
+<li><p><a href="#lrpco">LR-CCO</a></p></li>
+<li><p><a href="#lrlda">LR-LDA</a></p></li>
+</ol>
+<div id="installation" class="section level2">
+<h2>1. Installation<a name="installation"></a></h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co">#install.packages(&quot;ToolsForCoDa&quot;)</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(calibrate)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(Correlplot)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(ToolsForCoDa)</span></code></pre></div>
+</div>
+<div id="logratio-principal-component-analysis-lr-pca" class="section level2">
+<h2>2. Logratio principal component analysis
+(LR-PCA)<a name="lrpca"></a></h2>
+<p>We consider the composition of 37 Pinot Noir samples, consisting of
+the concentrations of Cd, Mo, Mn, Ni, Cu, Al, Ba, Cr, Sr, Pb, B, Mg, Si,
+Na, Ca, P, K and an evaluation of the wine’s aroma. (<span class="citation">Frank and Kowalski (1984)</span>).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(PinotNoir)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">head</span>(PinotNoir)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt;      Cd    Mo    Mn    Ni    Cu    Al    Ba    Cr    Sr    Pb    B  Mg   Si</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; 1 0.005 0.044 1.510 0.122 0.830 0.982 0.387 0.029 1.230 0.561 2.63 128 17.3</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; 2 0.055 0.160 1.160 0.149 0.066 1.020 0.312 0.038 0.975 0.697 6.21 193 19.7</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; 3 0.056 0.146 1.100 0.088 0.643 1.290 0.308 0.035 1.140 0.730 3.05 127 15.8</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; 4 0.063 0.191 0.959 0.380 0.133 1.050 0.165 0.036 0.927 0.796 2.57 112 13.4</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 5 0.011 0.363 1.380 0.160 0.051 1.320 0.380 0.059 1.130 1.730 3.07 138 16.7</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; 6 0.050 0.106 1.250 0.114 0.055 1.270 0.275 0.019 1.050 0.491 6.56 172 18.7</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;     Na    Ca   P    K Aroma</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; 1 66.8  80.5 150 1130   3.3</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; 2 53.3  75.0 118 1010   4.4</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; 3 35.4  91.0 161 1160   3.9</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; 4 27.5  93.6 120  924   3.9</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; 5 76.6  84.6 164 1090   5.6</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; 6 15.7 112.0 137 1290   4.6</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>Aroma <span class="ot">&lt;-</span> PinotNoir[,<span class="fu">c</span>(<span class="st">&quot;Aroma&quot;</span>)]</span></code></pre></div>
+<p>We apply closure to the chemical concentrations by division by their
+total, and use <code>lrpca</code> to do perform LR-PCA.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>X  <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(PinotNoir[,<span class="dv">1</span><span class="sc">:</span><span class="dv">17</span>])</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Xc <span class="ot">&lt;-</span> X<span class="sc">/</span><span class="fu">rowSums</span>(X)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>out.lrpca <span class="ot">&lt;-</span> <span class="fu">lrpca</span>(Xc)</span></code></pre></div>
+<p>We study the decomposition of compositional variance, and the decay
+of the LR-PCA eigenvalues by means of a screeplot</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">round</span>(out.lrpca<span class="sc">$</span>decom,<span class="dv">2</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt;      PC1  PC2  PC3  PC4  PC5  PC6  PC7  PC8  PC9 PC10 PC11 PC12 PC13 PC14 PC15</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; la  1.44 1.00 0.59 0.47 0.25 0.25 0.18 0.14 0.12 0.07 0.04 0.04 0.02 0.01 0.01</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; laf 0.31 0.22 0.13 0.10 0.05 0.05 0.04 0.03 0.03 0.01 0.01 0.01 0.00 0.00 0.00</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; lac 0.31 0.53 0.66 0.76 0.81 0.87 0.90 0.93 0.96 0.97 0.98 0.99 1.00 1.00 1.00</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;     PC16 PC17</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; la     0    0</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; laf    0    0</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; lac    1    1</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(out.lrpca<span class="sc">$</span>decom),</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>     out.lrpca<span class="sc">$</span>decom[<span class="dv">1</span>,],<span class="at">type=</span><span class="st">&quot;b&quot;</span>,<span class="at">main=</span><span class="st">&quot;Scree-plot&quot;</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">&quot;PC&quot;</span>,<span class="at">ylab=</span><span class="st">&quot;Eigenvalue&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p>We construct a covariance biplot, using <code>jointlim</code> to
+establish sensible limits for the x and y axes. Column markers for the
+clr transformed variables are multiplied by a constant (2.5) for a
+better visualization, and the amount of explained variance is indicated
+on the coordinate axes.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>lims <span class="ot">&lt;-</span> <span class="fu">jointlim</span>(out.lrpca<span class="sc">$</span>Fs,<span class="fl">2.5</span><span class="sc">*</span>out.lrpca<span class="sc">$</span>Gp)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">bplot</span>(out.lrpca<span class="sc">$</span>Fs,<span class="fl">2.5</span><span class="sc">*</span>out.lrpca<span class="sc">$</span>Gp,<span class="at">rowlab=</span><span class="st">&quot;&quot;</span>,<span class="at">collab=</span><span class="fu">colnames</span>(Xc),<span class="at">rowch=</span><span class="dv">1</span>,<span class="at">colch=</span><span class="cn">NA</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>      <span class="at">xl=</span>lims<span class="sc">$</span>xlim,<span class="at">yl=</span>lims<span class="sc">$</span>ylim,<span class="at">main=</span><span class="st">&quot;Covariance biplot&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>pc1lab <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;PC1 (&quot;</span>,<span class="fu">toString</span>(<span class="fu">round</span>(<span class="dv">100</span><span class="sc">*</span>out.lrpca<span class="sc">$</span>decom[<span class="dv">2</span>,<span class="dv">1</span>],<span class="dv">1</span>)),<span class="st">&quot;%)&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>pc2lab <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;PC2 (&quot;</span>,<span class="fu">toString</span>(<span class="fu">round</span>(<span class="dv">100</span><span class="sc">*</span>out.lrpca<span class="sc">$</span>decom[<span class="dv">2</span>,<span class="dv">2</span>],<span class="dv">1</span>)),<span class="st">&quot;%)&quot;</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="fl">0.1</span>,pc1lab,<span class="at">cex=</span><span class="fl">0.75</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">text</span>(<span class="fl">0.1</span>,<span class="fl">1.5</span>,pc2lab,<span class="at">cex=</span><span class="fl">0.75</span>,<span class="at">srt=</span><span class="dv">90</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p>This biplot reveals that the logratio <span class="math inline">\(\ln{(Na/Pb)}\)</span> has a large variance and is
+tightly correlated to the first principal component.</p>
+<p>The variable <code>Aroma</code> correlates with the first principal
+components</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">cor</span>(Aroma,out.lrpca<span class="sc">$</span>Fs[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt;            PC1        PC2</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; [1,] 0.4128395 -0.4117683</span></span></code></pre></div>
+<p>and as the biplot suggests, <code>Aroma</code> correlates positively
+with the logratio <span class="math inline">\(\ln{(Cr/Sr)}\)</span></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>logScSr <span class="ot">&lt;-</span> <span class="fu">log</span>(Xc[,<span class="fu">c</span>(<span class="st">&quot;Cr&quot;</span>)]<span class="sc">/</span>Xc[,<span class="fu">c</span>(<span class="st">&quot;Sr&quot;</span>)])</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">cor</span>(Aroma,logScSr)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; [1] 0.6469465</span></span></code></pre></div>
+<p>We note function <code>lrpca</code> also calculates condition
+indices, which may prove useful for detecting proportionality or
+one-dimensional relationships (<span class="citation">Graffelman
+(2021)</span>).</p>
+</div>
+<div id="logratio-canonical-correlation-analysys-lr-cco" class="section level2">
+<h2>3. Logratio canonical correlation analysys
+(LR-CCO)<a name="lrcco"></a></h2>
+<p>Two examples of LR-CCO are given below. The first example concerns a
+small artificial data set, where both the X and Y set are compositional,
+and is described in Section 3.1 of Graffelman et al. (2018). The second
+example concerns major oxides compositions of bentonites, where the X
+set is compositional and Y set is not.</p>
+<div id="artificial-data" class="section level3">
+<h3>3.1 Artificial data</h3>
+<p>We first load two artificial 3-part compositions.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;Artificial&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>Xsim.com <span class="ot">&lt;-</span> Artificial<span class="sc">$</span>Xsim.com</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>Ysim.com <span class="ot">&lt;-</span> Artificial<span class="sc">$</span>Ysim.com</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">colnames</span>(Xsim.com) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;X&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="fu">colnames</span>(Ysim.com) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;Y&quot;</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="at">sep=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<p>We make the ternary diagrams of the two sets of compositions</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>opar <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>),<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>)<span class="sc">+</span><span class="fl">0.5</span>,<span class="at">pty=</span><span class="st">&quot;s&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfg=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">ternaryplot</span>(Xsim.com,<span class="at">pch=</span><span class="dv">1</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfg=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="fu">ternaryplot</span>(Ysim.com,<span class="at">pch=</span><span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">par</span>(opar)</span></code></pre></div>
+<p>We perform the compositional canonical analysis:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>out.lrcco <span class="ot">&lt;-</span> <span class="fu">lrcco</span>(Xsim.com,Ysim.com)</span></code></pre></div>
+<p>And we reproduce the results in Table 1 of Graffelman et al. (2018).
+The canonical correlations are obtained as</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">diag</span>(out.lrcco<span class="sc">$</span>ccor),<span class="at">digits=</span><span class="dv">3</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; [1] 0.944 0.129 0.000</span></span></code></pre></div>
+<p>The canonical weights of the X set and the Y set are obtained by:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>out.lrcco<span class="sc">$</span>A</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt;               [,1]      [,2]          [,3]</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; [1,]  0.0008130933  3.847198 -1.110223e-15</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co">#&gt; [2,] -0.7985815849 -3.446655  6.522560e-16</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; [3,]  0.7977684917 -0.400543  1.665335e-16</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>out.lrcco<span class="sc">$</span>B</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt;            [,1]        [,2]          [,3]</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; [1,]  0.7624647 -0.05038131 -9.714451e-17</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; [2,] -0.7165761 -0.52116661  3.608225e-16</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; [3,] -0.0458886  0.57154792 -2.775558e-16</span></span></code></pre></div>
+<p>The canonical loadings of the X set and the Y set are obtained by</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>out.lrcco<span class="sc">$</span>Rxu</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt;          [,1]       [,2]       [,3]</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; X1 -0.8857398  0.4641822 -0.9035794</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; X2 -0.9828511 -0.1844012 -0.4438392</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; X3  0.9940477 -0.1089461  0.6849272</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>out.lrcco<span class="sc">$</span>Ryv</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt;          [,1]       [,2]       [,3]</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; Y1  0.8522677 -0.5231058  0.2439545</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; Y2 -0.6097840 -0.7925676  0.9387752</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; Y3 -0.3033098  0.9528920 -0.8183778</span></span></code></pre></div>
+<p>The adequacy coefficients of the X set and the Y set:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>out.lrcco<span class="sc">$</span>fitXs</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt;            [,1]       [,2]      [,3]</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt; AdeX  0.9128873 0.08711271 0.4941914</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; cAdeX 0.9128873 1.00000000 1.4941914</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>out.lrcco<span class="sc">$</span>fitYs</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt;            [,1]      [,2]      [,3]</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; AdeY  0.3967312 0.6032688 0.5368516</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; cAdeY 0.3967312 1.0000000 1.5368516</span></span></code></pre></div>
+<p>The redundancy coefficients of the X set and the Y set</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>out.lrcco<span class="sc">$</span>fitXp</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt;            [,1]        [,2]       [,3]</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt; RedX  0.8132984 0.001442577 0.06638809</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; cRedX 0.8132984 0.814740980 0.88112907</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>out.lrcco<span class="sc">$</span>fitYp</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt;            [,1]        [,2]      [,3]</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt; RedY  0.3534509 0.009990066 0.1440308</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; cRedY 0.3534509 0.363441013 0.5074718</span></span></code></pre></div>
+<p>Finally, we make the full set of biplots for LR-CCO given in Figure 2
+(<span class="citation">Graffelman et al. (2018)</span>). In each
+biplot, the canonical variates are multiplied by a convenient scalar to
+facilitate the visualization.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>opar <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>),<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>)<span class="sc">+</span><span class="fl">0.5</span>,<span class="at">mgp=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">0</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfg=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># Figure A</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">rbind</span>(out.lrcco<span class="sc">$</span>Fs,out.lrcco<span class="sc">$</span>Gp)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="fu">plot</span>(Z[,<span class="dv">1</span>],Z[,<span class="dv">2</span>],<span class="at">type=</span><span class="st">&quot;n&quot;</span>,<span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="at">asp=</span><span class="dv">1</span>,<span class="at">xlab=</span><span class="st">&quot;&quot;</span>,<span class="at">ylab=</span><span class="st">&quot;&quot;</span>,<span class="at">main=</span><span class="st">&quot;A&quot;</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span>],Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;blue&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="fu">text</span>(out.lrcco<span class="sc">$</span>Fs[,<span class="dv">1</span>],out.lrcco<span class="sc">$</span>Fs[,<span class="dv">2</span>],</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(X[<span class="dv">1</span>]),<span class="fu">expression</span>(X[<span class="dv">2</span>]),<span class="fu">expression</span>(X[<span class="dv">3</span>])))</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="fu">text</span>(out.lrcco<span class="sc">$</span>Gp[,<span class="dv">1</span>],out.lrcco<span class="sc">$</span>Gp[,<span class="dv">2</span>],</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(Y[<span class="dv">1</span>]),<span class="fu">expression</span>(Y[<span class="dv">2</span>]),<span class="fu">expression</span>(Y[<span class="dv">3</span>])),<span class="at">pos=</span><span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">1</span>))</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>fa <span class="ot">&lt;-</span> <span class="fl">0.15</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="fu">points</span>(fa<span class="sc">*</span>out.lrcco<span class="sc">$</span>U[,<span class="dv">1</span>],fa<span class="sc">*</span>out.lrcco<span class="sc">$</span>U[,<span class="dv">2</span>])</span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfg=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="co"># Figure B</span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">rbind</span>(out.lrcco<span class="sc">$</span>Fp,out.lrcco<span class="sc">$</span>Gs)</span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="fu">plot</span>(Z[,<span class="dv">1</span>],Z[,<span class="dv">2</span>],<span class="at">type=</span><span class="st">&quot;n&quot;</span>,<span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>,<span class="fl">1.5</span>),<span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>,<span class="fl">1.5</span>),<span class="at">asp=</span><span class="dv">1</span>,<span class="at">xlab=</span><span class="st">&quot;&quot;</span>,<span class="at">ylab=</span><span class="st">&quot;&quot;</span>,<span class="at">main=</span><span class="st">&quot;B&quot;</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span>],Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;blue&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="fu">text</span>(out.lrcco<span class="sc">$</span>Fp[,<span class="dv">1</span>],out.lrcco<span class="sc">$</span>Fp[,<span class="dv">2</span>],</span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(X[<span class="dv">1</span>]),<span class="fu">expression</span>(X[<span class="dv">2</span>]),<span class="fu">expression</span>(X[<span class="dv">3</span>])))</span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="fu">text</span>(out.lrcco<span class="sc">$</span>Gs[,<span class="dv">1</span>],out.lrcco<span class="sc">$</span>Gs[,<span class="dv">2</span>],</span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(Y[<span class="dv">1</span>]),<span class="fu">expression</span>(Y[<span class="dv">2</span>]),<span class="fu">expression</span>(Y[<span class="dv">3</span>])),<span class="at">pos=</span><span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">1</span>))</span>
+<span id="cb17-30"><a href="#cb17-30" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb17-31"><a href="#cb17-31" tabindex="-1"></a>fa <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb17-32"><a href="#cb17-32" tabindex="-1"></a><span class="fu">points</span>(fa<span class="sc">*</span>out.lrcco<span class="sc">$</span>V[,<span class="dv">1</span>],fa<span class="sc">*</span>out.lrcco<span class="sc">$</span>V[,<span class="dv">2</span>])</span>
+<span id="cb17-33"><a href="#cb17-33" tabindex="-1"></a></span>
+<span id="cb17-34"><a href="#cb17-34" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-35"><a href="#cb17-35" tabindex="-1"></a><span class="co"># Standardizing the clr transformed data</span></span>
+<span id="cb17-36"><a href="#cb17-36" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-37"><a href="#cb17-37" tabindex="-1"></a>Xstan.clr <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">clrmat</span>(Xsim.com))</span>
+<span id="cb17-38"><a href="#cb17-38" tabindex="-1"></a>Ystan.clr <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">clrmat</span>(Ysim.com))</span>
+<span id="cb17-39"><a href="#cb17-39" tabindex="-1"></a>res.stan.cco <span class="ot">&lt;-</span> <span class="fu">canocov</span>(Xstan.clr,Ystan.clr)</span>
+<span id="cb17-40"><a href="#cb17-40" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfg=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))</span>
+<span id="cb17-41"><a href="#cb17-41" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-42"><a href="#cb17-42" tabindex="-1"></a><span class="co"># Figure C</span></span>
+<span id="cb17-43"><a href="#cb17-43" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-44"><a href="#cb17-44" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">rbind</span>(res.stan.cco<span class="sc">$</span>Fs,res.stan.cco<span class="sc">$</span>Gp)</span>
+<span id="cb17-45"><a href="#cb17-45" tabindex="-1"></a><span class="fu">plot</span>(Z[,<span class="dv">1</span>],Z[,<span class="dv">2</span>],<span class="at">type=</span><span class="st">&quot;n&quot;</span>,<span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="at">asp=</span><span class="dv">1</span>,<span class="at">xlab=</span><span class="st">&quot;&quot;</span>,<span class="at">ylab=</span><span class="st">&quot;&quot;</span>,<span class="at">main=</span><span class="st">&quot;C&quot;</span>)</span>
+<span id="cb17-46"><a href="#cb17-46" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-47"><a href="#cb17-47" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span>],Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;blue&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-48"><a href="#cb17-48" tabindex="-1"></a><span class="fu">text</span>(res.stan.cco<span class="sc">$</span>Fs[,<span class="dv">1</span>],res.stan.cco<span class="sc">$</span>Fs[,<span class="dv">2</span>],</span>
+<span id="cb17-49"><a href="#cb17-49" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(X[<span class="dv">1</span>]),<span class="fu">expression</span>(X[<span class="dv">2</span>]),<span class="fu">expression</span>(X[<span class="dv">3</span>])))</span>
+<span id="cb17-50"><a href="#cb17-50" tabindex="-1"></a><span class="fu">text</span>(res.stan.cco<span class="sc">$</span>Gp[,<span class="dv">1</span>],res.stan.cco<span class="sc">$</span>Gp[,<span class="dv">2</span>],</span>
+<span id="cb17-51"><a href="#cb17-51" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(Y[<span class="dv">1</span>]),<span class="fu">expression</span>(Y[<span class="dv">2</span>]),<span class="fu">expression</span>(Y[<span class="dv">3</span>])),<span class="at">pos=</span><span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">1</span>))</span>
+<span id="cb17-52"><a href="#cb17-52" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb17-53"><a href="#cb17-53" tabindex="-1"></a>fa <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb17-54"><a href="#cb17-54" tabindex="-1"></a><span class="fu">points</span>(fa<span class="sc">*</span>res.stan.cco<span class="sc">$</span>U[,<span class="dv">1</span>],fa<span class="sc">*</span>res.stan.cco<span class="sc">$</span>U[,<span class="dv">2</span>])</span>
+<span id="cb17-55"><a href="#cb17-55" tabindex="-1"></a><span class="fu">circle</span>()</span>
+<span id="cb17-56"><a href="#cb17-56" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfg=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb17-57"><a href="#cb17-57" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-58"><a href="#cb17-58" tabindex="-1"></a><span class="co"># Figure D</span></span>
+<span id="cb17-59"><a href="#cb17-59" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-60"><a href="#cb17-60" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">rbind</span>(res.stan.cco<span class="sc">$</span>Fp,res.stan.cco<span class="sc">$</span>Gs)</span>
+<span id="cb17-61"><a href="#cb17-61" tabindex="-1"></a><span class="fu">plot</span>(Z[,<span class="dv">1</span>],Z[,<span class="dv">2</span>],<span class="at">type=</span><span class="st">&quot;n&quot;</span>,<span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>,<span class="fl">1.5</span>),<span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>,<span class="fl">1.5</span>),<span class="at">asp=</span><span class="dv">1</span>,<span class="at">xlab=</span><span class="st">&quot;&quot;</span>,<span class="at">ylab=</span><span class="st">&quot;&quot;</span>,<span class="at">main=</span><span class="st">&quot;D&quot;</span>)</span>
+<span id="cb17-62"><a href="#cb17-62" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">1</span>],Z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-63"><a href="#cb17-63" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span>],Z[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;blue&quot;</span>,<span class="at">angle=</span><span class="dv">10</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb17-64"><a href="#cb17-64" tabindex="-1"></a><span class="fu">text</span>(res.stan.cco<span class="sc">$</span>Fp[,<span class="dv">1</span>],res.stan.cco<span class="sc">$</span>Fp[,<span class="dv">2</span>],</span>
+<span id="cb17-65"><a href="#cb17-65" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(X[<span class="dv">1</span>]),<span class="fu">expression</span>(X[<span class="dv">2</span>]),<span class="fu">expression</span>(X[<span class="dv">3</span>])))</span>
+<span id="cb17-66"><a href="#cb17-66" tabindex="-1"></a><span class="fu">text</span>(res.stan.cco<span class="sc">$</span>Gs[,<span class="dv">1</span>],res.stan.cco<span class="sc">$</span>Gs[,<span class="dv">2</span>],</span>
+<span id="cb17-67"><a href="#cb17-67" tabindex="-1"></a>     <span class="fu">c</span>(<span class="fu">expression</span>(Y[<span class="dv">1</span>]),<span class="fu">expression</span>(Y[<span class="dv">2</span>]),<span class="fu">expression</span>(Y[<span class="dv">3</span>])),<span class="at">pos=</span><span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">1</span>))</span>
+<span id="cb17-68"><a href="#cb17-68" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb17-69"><a href="#cb17-69" tabindex="-1"></a>fa <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb17-70"><a href="#cb17-70" tabindex="-1"></a><span class="fu">points</span>(fa<span class="sc">*</span>res.stan.cco<span class="sc">$</span>V[,<span class="dv">1</span>],fa<span class="sc">*</span>res.stan.cco<span class="sc">$</span>V[,<span class="dv">2</span>])</span>
+<span id="cb17-71"><a href="#cb17-71" tabindex="-1"></a><span class="fu">circle</span>()</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">par</span>(opar)</span></code></pre></div>
+<p>Panel A shows the logratios <span class="math inline">\(\log{(x_2/x_3)}\)</span> and <span class="math inline">\(\log{(y_1/y_2)}\)</span> to have long links that
+run parallel to the first canonical variate with the largest canonical
+correlation; these logratios are highly correlated. The canonical biplot
+shows the association between the two sets of compositions, which is not
+visible in the ternary diagrams above.</p>
+</div>
+<div id="canonical-analysis-of-bentonites" class="section level3">
+<h3>3.2 Canonical analysis of bentonites</h3>
+<p>In this subsection we treat the canonical analysis of bentonites. The
+X set concerns the concentrations of 9 major oxides, measured in 14
+samples in the US (<span class="citation">Cadrin et al. (1996)</span>).
+A canonical analysis of this data set has been previously described
+(<span class="citation">Reyment and Savazzi (1999)</span>), and is
+extended here with biplots. The Y set concerns two isotopes, <span class="math inline">\(\delta D\)</span> and <span class="math inline">\(\delta 18O\)</span>.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;bentonites&quot;</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">head</span>(bentonites)</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="co">#&gt;      Si    Al   Fe    Mn   Mg   Ca    K   Na   H20  dD d18O</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#&gt; 1 51.17 19.18 2.09 0.001 4.54 1.30 2.30 0.93  9.88  93 13.5</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; 2 50.66 19.01 1.67 0.001 2.70 1.70 0.39 0.67  9.99  92 21.9</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; 3 54.38 20.03 2.04 0.001 3.54 2.04 0.10 0.20 10.26  93 21.9</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co">#&gt; 4 55.58 18.76 0.56 0.001 4.51 2.00 0.31 0.90  9.54 100 24.6</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co">#&gt; 5 54.43 22.58 0.69 0.001 3.75 1.47 0.75 0.15  9.14 111 21.7</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co">#&gt; 6 62.79 20.75 1.14 0.060 4.26 0.14 0.42 0.40  8.28 114 24.1</span></span></code></pre></div>
+<p>We clr-transform and column-center the major oxides, after deletion
+of MnO which is outlying and had many zeros, which were replaced with
+0.001. We standardize the isotopes.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>X <span class="ot">&lt;-</span> bentonites[,<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> X[,<span class="sc">-</span><span class="dv">4</span>]</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>X <span class="ot">&lt;-</span> X<span class="sc">/</span><span class="fu">rowSums</span>(X)</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">scale</span>(bentonites[,<span class="dv">10</span><span class="sc">:</span><span class="dv">11</span>])</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>Xclr <span class="ot">&lt;-</span> <span class="fu">clrmat</span>(X)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>cco <span class="ot">&lt;-</span> <span class="fu">canocov</span>(Xclr,Y)</span></code></pre></div>
+<p>The two canonical correlations are large:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">diag</span>(cco<span class="sc">$</span>ccor)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="co">#&gt; [1] 0.9656383 0.8244852</span></span></code></pre></div>
+<p>We construct a biplot of the data:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">plot</span>(cco<span class="sc">$</span>Fs[,<span class="dv">1</span>],cco<span class="sc">$</span>Fs[,<span class="dv">2</span>],<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">pch=</span><span class="cn">NA</span>,<span class="at">xlab=</span><span class="st">&quot;First principal axis&quot;</span>,</span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>     <span class="at">ylab=</span><span class="st">&quot;Second principal axis&quot;</span>,<span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">1</span>),<span class="at">asp=</span><span class="dv">1</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="fu">textxy</span>(cco<span class="sc">$</span>Fs[,<span class="dv">1</span>],cco<span class="sc">$</span>Fs[,<span class="dv">2</span>],<span class="fu">colnames</span>(X),<span class="at">cex=</span><span class="fl">0.75</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,cco<span class="sc">$</span>Gp[,<span class="dv">1</span>],cco<span class="sc">$</span>Gp[,<span class="dv">2</span>],<span class="at">angle=</span><span class="dv">10</span>,<span class="at">col=</span><span class="st">&quot;blue&quot;</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,cco<span class="sc">$</span>Fs[,<span class="dv">1</span>],cco<span class="sc">$</span>Fs[,<span class="dv">2</span>],<span class="at">angle=</span><span class="dv">10</span>,<span class="at">col=</span><span class="st">&quot;red&quot;</span>,<span class="at">length=</span><span class="fl">0.1</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="fu">text</span>(cco<span class="sc">$</span>Gp[,<span class="dv">1</span>],cco<span class="sc">$</span>Gp[,<span class="dv">2</span>],<span class="fu">colnames</span>(Y),<span class="at">pos=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>))</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a>fa <span class="ot">&lt;-</span> <span class="fl">0.45</span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="fu">points</span>(fa<span class="sc">*</span>cco<span class="sc">$</span>U[,<span class="dv">1</span>],fa<span class="sc">*</span>cco<span class="sc">$</span>U[,<span class="dv">2</span>])</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="fu">textxy</span>(fa<span class="sc">*</span>cco<span class="sc">$</span>U[,<span class="dv">1</span>],fa<span class="sc">*</span>cco<span class="sc">$</span>U[,<span class="dv">2</span>],<span class="dv">1</span><span class="sc">:</span><span class="dv">14</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p>We overplot the biplot with the canonical X-variates, which allows
+one to inspect the original samples (<span class="citation">Graffelman
+(2005)</span>). For plotting, the canonical variate is scaled with a
+convenient scaling factor (here 0.45). This factor does not affect the
+interpretation of the biplot, but gives the samples a convenient
+spread.</p>
+<p>The logratio <span class="math inline">\(\log{(Na/Mg)}\)</span>
+(among others) almost coincides with the first canonical variate, which
+correlates with <span class="math inline">\(\delta 18O\)</span>.
+However, interpretation should proceed with care because of the small
+sample size.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>lnNaCa <span class="ot">&lt;-</span> <span class="fu">log</span>(X[,<span class="fu">c</span>(<span class="st">&quot;Na&quot;</span>)]<span class="sc">/</span>X[,<span class="fu">c</span>(<span class="st">&quot;Mg&quot;</span>)])</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">cor</span>(Y[,<span class="fu">c</span>(<span class="st">&quot;d18O&quot;</span>)],lnNaCa)</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="co">#&gt; [1] -0.7034501</span></span></code></pre></div>
+</div>
+</div>
+<div id="logratio-discriminant-analysis-lr-lda" class="section level2">
+<h2>4. Logratio discriminant analysis (LR-LDA)<a name="lrlda"></a></h2>
+<p>We use archeological data from the UK (<span class="citation">Tubb,
+Parker, and Nickless (1980)</span>) to illustrate LR-LDA. This dataset
+consists of measurements of nine oxides on 48 archeological samples from
+three regions in the UK. We first prepare the data:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">data</span>(Tubb)</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="fu">head</span>(Tubb)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="co">#&gt;   Sample Al2O3 Fe2O3  MgO  CaO Na2O  K2O TiO2   MnO   BaO site</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="co">#&gt; 1    GA1  18.8  9.52 2.00 0.79 0.40 3.20 1.01 0.077 0.015    G</span></span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="co">#&gt; 2    GA2  16.9  7.33 1.65 0.84 0.40 3.05 0.99 0.067 0.018    G</span></span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a><span class="co">#&gt; 3    GA3  18.2  7.64 1.82 0.77 0.40 3.07 0.98 0.087 0.014    G</span></span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="co">#&gt; 4    GA4  17.4  7.48 1.71 1.01 0.40 3.16 0.03 0.084 0.017    G</span></span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="co">#&gt; 5    GA5  16.9  7.29 1.56 0.76 0.40 3.05 1.00 0.063 0.019    G</span></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="co">#&gt; 6    GB1  17.8  7.24 1.83 0.92 0.43 3.12 0.93 0.061 0.019    G</span></span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>site             <span class="ot">&lt;-</span> <span class="fu">factor</span>(Tubb<span class="sc">$</span>site)</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>Oxides           <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(Tubb[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a><span class="fu">rownames</span>(Oxides) <span class="ot">&lt;-</span> Tubb<span class="sc">$</span>Sample</span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>Oxides           <span class="ot">&lt;-</span> Oxides<span class="sc">/</span><span class="fu">rowSums</span>(Oxides)</span></code></pre></div>
+<p>Next, we carry out LR-LDA by passing the compositions in
+<code>Oxides</code> to the function <code>lrlda</code>. Internally,
+<code>lrlda</code> applies the clr transformation of the data.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>out.lrlda <span class="ot">&lt;-</span> <span class="fu">lrlda</span>(Oxides,site)</span></code></pre></div>
+<p>The group sizes are obtained with:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>out.lrlda<span class="sc">$</span>gsizes</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="co">#&gt;  G NF  W </span></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="co">#&gt; 22 10 16</span></span></code></pre></div>
+<p>The group mean vectors of the clr transformed compositions are given
+by:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>out.lrlda<span class="sc">$</span>Mclr</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="co">#&gt;   Group.1    Al2O3    Fe2O3       MgO         CaO       Na2O      K2O</span></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a><span class="co">#&gt; 1       G 3.011200 2.187485 0.7873925  0.09020565 -0.9765462 1.315820</span></span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a><span class="co">#&gt; 2      NF 4.348294 1.899077 1.0256504 -2.12623244 -1.5607332 2.175829</span></span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a><span class="co">#&gt; 3       W 2.807714 2.115195 1.8167997 -1.29407136 -1.3695227 1.622022</span></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a><span class="co">#&gt;          TiO2       MnO       BaO</span></span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a><span class="co">#&gt; 1 -0.03735507 -2.485644 -3.892557</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a><span class="co">#&gt; 2  1.47214116 -4.560993 -2.673032</span></span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a><span class="co">#&gt; 3 -0.08569854 -1.777495 -3.834943</span></span></code></pre></div>
+<p>The scores of the linear discriminant function are obtained by:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">head</span>(out.lrlda<span class="sc">$</span>LD)</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="co">#&gt;             LD1      LD2</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a><span class="co">#&gt; GA1  1.09082644 4.920326</span></span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a><span class="co">#&gt; GA2  0.05755742 4.460343</span></span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="co">#&gt; GA3  0.67388420 4.715621</span></span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="co">#&gt; GA4  1.55665675 4.892781</span></span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="co">#&gt; GA5 -0.38244898 4.436551</span></span>
+<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a><span class="co">#&gt; GB1  0.03938665 4.029670</span></span></code></pre></div>
+<p>The confusion matrix for the training observations is:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>out.lrlda<span class="sc">$</span>CM</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="co">#&gt;      pred</span></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a><span class="co">#&gt; group  G NF  W</span></span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a><span class="co">#&gt;    G  22  0  0</span></span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a><span class="co">#&gt;    NF  0 10  0</span></span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a><span class="co">#&gt;    W   0  0 16</span></span></code></pre></div>
+<p>Posterior probabilities for the classifications are obtained by</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">round</span>(out.lrlda<span class="sc">$</span>prob.posterior,<span class="dv">4</span>))</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="co">#&gt;     G NF W</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="co">#&gt; GA1 1  0 0</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a><span class="co">#&gt; GA2 1  0 0</span></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a><span class="co">#&gt; GA3 1  0 0</span></span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a><span class="co">#&gt; GA4 1  0 0</span></span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1"></a><span class="co">#&gt; GA5 1  0 0</span></span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1"></a><span class="co">#&gt; GB1 1  0 0</span></span></code></pre></div>
+<p>We extract biplot coordinates for group centers, individual
+observations and variables, and construct the LDA biplot.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>Fp <span class="ot">&lt;-</span> out.lrlda<span class="sc">$</span>Fp</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>Gs <span class="ot">&lt;-</span> out.lrlda<span class="sc">$</span>Gs</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>LD <span class="ot">&lt;-</span> out.lrlda<span class="sc">$</span>LD</span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>colvec <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>,<span class="fu">nrow</span>(Oxides))</span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a>colvec[site<span class="sc">==</span><span class="st">&quot;G&quot;</span>]  <span class="ot">&lt;-</span> <span class="st">&quot;red&quot;</span></span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>colvec[site<span class="sc">==</span><span class="st">&quot;NF&quot;</span>] <span class="ot">&lt;-</span> <span class="st">&quot;green&quot;</span></span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a>colvec[site<span class="sc">==</span><span class="st">&quot;W&quot;</span>]  <span class="ot">&lt;-</span> <span class="st">&quot;blue&quot;</span></span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a>lims <span class="ot">&lt;-</span> <span class="fu">jointlim</span>(LD,Fp)</span>
+<span id="cb31-12"><a href="#cb31-12" tabindex="-1"></a>opar <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">bty=</span><span class="st">&quot;n&quot;</span>,<span class="at">xaxt=</span><span class="st">&quot;n&quot;</span>,<span class="at">yaxt=</span><span class="st">&quot;n&quot;</span>)   </span>
+<span id="cb31-13"><a href="#cb31-13" tabindex="-1"></a><span class="fu">plot</span>(Fp[,<span class="dv">1</span>],Fp[,<span class="dv">2</span>],<span class="at">asp=</span><span class="dv">1</span>,<span class="at">pch=</span><span class="dv">17</span>,<span class="at">xlab=</span><span class="st">&quot;&quot;</span>,<span class="at">ylab=</span><span class="st">&quot;&quot;</span>,<span class="at">col=</span><span class="fu">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;blue&quot;</span>),</span>
+<span id="cb31-14"><a href="#cb31-14" tabindex="-1"></a>     <span class="at">xlim=</span>lims<span class="sc">$</span>xlim,<span class="at">ylim=</span>lims<span class="sc">$</span>ylim,<span class="at">cex=</span><span class="fl">1.25</span>)</span>
+<span id="cb31-15"><a href="#cb31-15" tabindex="-1"></a><span class="fu">points</span>(LD[,<span class="dv">1</span>],LD[,<span class="dv">2</span>],<span class="at">col=</span>colvec)</span>
+<span id="cb31-16"><a href="#cb31-16" tabindex="-1"></a><span class="fu">origin</span>()</span>
+<span id="cb31-17"><a href="#cb31-17" tabindex="-1"></a><span class="fu">arrows</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">10</span><span class="sc">*</span>Gs[,<span class="dv">1</span>],<span class="dv">10</span><span class="sc">*</span>Gs[,<span class="dv">2</span>],<span class="at">angle =</span> <span class="dv">10</span>, <span class="at">length =</span> <span class="fl">0.1</span>)</span>
+<span id="cb31-18"><a href="#cb31-18" tabindex="-1"></a><span class="fu">textxy</span>(<span class="dv">10</span><span class="sc">*</span>Gs[,<span class="dv">1</span>],<span class="dv">10</span><span class="sc">*</span>Gs[,<span class="dv">2</span>],<span class="fu">colnames</span>(Oxides))</span>
+<span id="cb31-19"><a href="#cb31-19" tabindex="-1"></a><span class="fu">par</span>(opar)</span>
+<span id="cb31-20"><a href="#cb31-20" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="fu">c</span>(<span class="st">&quot;G&quot;</span>,<span class="st">&quot;NF&quot;</span>,<span class="st">&quot;W&quot;</span>),<span class="at">col=</span><span class="fu">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;blue&quot;</span>),<span class="at">pch=</span><span class="dv">1</span>,<span class="at">cex=</span><span class="fl">0.5</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAJACAMAAABSRCkEAAAA5FBMVEUAAAAAADoAAP8AOpAAZrYA/wA6AGY6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kLY6kNtmADpmAGZmOjpmOmZmOpBmZjpmZmZmZpBmZrZmkJBmkLZmkNtmtrZmtttmtv+QOjqQOmaQOpCQZjqQZmaQZpCQkDqQkGaQtpCQtraQttuQtv+Q29uQ2/+2Zjq2Zma2ZpC2kDq2kGa2tma2tpC2tra225C22/+2/9u2///bkDrbkGbbtmbbtpDbtrbb25Db27bb29vb2//b/7bb/9vb////AAD/tmb/25D/27b//7b//9v///+WV578AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAUR0lEQVR4nO2dD3/a1hWGb9m8kcSOuzhx0rhxM9vr1g7cps1S7KarlwCu0ff/PgMhQAghDOce6ZzX79PG8R+I7vvy/KQrIckhIURAaHoAxDcUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBARQYGICApERFAgIoICEREUiIigQEQEBSIiKBAREVmgUEncZbkBOndsgWpclhugc1MgfaBzUyB9oHNTIH2gc1MgfaBzUyB9oHNTIH2gc6sINBjMvr591n7VV1qWG6Bzawg0SP+fcHvQT4aHSstyA3RuXYGuThWX5Qbo3LqbsOtO0v3rn5WW5Qbo3LqT6Mnm6+6V0rLcAJ1beS/s+tFx+43SstwAnZu78fpA56ZA+kDnpkD6QOdWEWhvr45luQE6t4ZAe+n/EyZ7YZedYbvdPom/LDdA51YW6ItO0u3MjkVDF1kBdG7dTdjw6+f9sUBPb24UluUG6NzKBxJPh4djgfbfv+/HX5YboHNrC5R029yENT0ATdQFuvuSAjU9AE14HEgf6NwUSB/o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" style="display: block; margin: auto;" /></p>
+<p>The LR-LDA biplot shows perfect separation of the three UK regions
+and suggests that a single logratio like <span class="math inline">\(\log{(MgO/Al2O3)}\)</span> (among other
+possibilities) is capable of discriminating the three regions. A boxplot
+of this logratio confirms this.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>lrMgOAl2O2 <span class="ot">&lt;-</span> Oxides[,<span class="fu">c</span>(<span class="st">&quot;MgO&quot;</span>)]<span class="sc">/</span>Oxides[,<span class="fu">c</span>(<span class="st">&quot;Al2O3&quot;</span>)]</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="fu">boxplot</span>(lrMgOAl2O2<span class="sc">~</span>site,<span class="at">col=</span><span class="fu">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;blue&quot;</span>))</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAJACAMAAABSRCkEAAAAclBMVEUAAAAAADoAAGYAAP8AOjoAOmYAOpAAZpAAZrYA/wA6AAA6ADo6OgA6Ojo6OpA6kNtmAABmADpmOgBmZmZmtv+QOgCQOmaQtpCQ2/+2ZgC2Zma2///bkDrb2//b/9vb////AAD/tmb/25D//7b//9v///9daLHmAAAACXBIWXMAAA7DAAAOwwHHb6hkAAANn0lEQVR4nO3dbXvbRmKGUci7VVWnrbRbszVrtlpK5P//i+WLqCi5SonkgwEGmHM+RE4uZwBLt4eDF4LdFgLd2DvAtAmIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIj0HFDHTIwVUL/DMRYBEREQEQERERARAREREBEBEREQEQERERARAREREBEBERHQnBS/J+P/2WTvv3GU4fhSoe+4gFohICICIiIgaiQgIgIiIqBWWAMRERARAREREBEBUSMBEREQEQG1whqIiICITCmg16fH3T/XXdd9+9XDcPRhcgGt7p/3v/qRD0cfphbQWzqHjMLhqFixgF6+HwJan3kRE9BMmIGIFApo/16jh+1pOR0ORx+mtAbaHhq6+7k7EDvTj4AGN7GABh6OLwmIyEQDWjkKq8REA/rzKD28nZ+aeAkjIiAihQLaLI4vVC6mVmNSa6DV6fzP2RNBAhralALaLN6zcSmjFlMK6MNNHC6m1mJKAZmBKjSlgHZroLcpyBpo7godhR2vx3fdmflHQLPhPBARAbViUmugwYfjSwIiIiAiAiIiIGokICICIiKgVlgDEREQEQERERARAVEjAREREBEBtcIaiIiAiAiIiICICIgaCYiIgIgIqBXWQEQERERARAREREDUSEBEBEREQBPTDe6L/bl4x9M/edHh2tH9ZWACmhcBFRmuHQIqMlw7BFRkuHYIqMhw7RBQkeHaIaAiw7VDQEWGa4eAigzX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0NsUNPgaiIEVOgo73VJ2Zv4R0GzM7TwQAxMQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBZZp/3p6ACmrhDymgglr4QwqooBb+kAIqqIU/pIC+dvtCuYEFtoC+JqBPCOhrAvqEgL7W/cvAJvXN6f03jjJcUQL6hIC+5iXsEwIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiowXETIwUUClV7aadqWj7F6pqN+1MRdu/UFW7aWcq2v6FqtpNO1PR9i9U1W7amYq2f6GqdtPOVLT9C1W1m3amou1fqKrdtDMVbf9CVe2mnalo+0ycgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIjIFAJ6feq67v553J3YLL792n9d7nZk+fbWlx8j7s/y8A1ZdY+HfXsYbT8mENBq/4M6/fxGs1l0h5/SIaCxa95ZHb4fy//Y78rr0+No+1F/QC/fD3/Rx/xbdtz+X3/7ua0noMO35fVv/7XfqZfDno2j/oBOP63VmC8Yh4BXD9t6AjrMOuv7/138OM1G46g+oM1ivOn5o11Ar08/6glou9zlvEt6/2U54uRcfUCHn1oF9i+hq7d4qghoff+82U0/b19GM5GA9sc9466i9wHtZ8MPR2Hjlr1b+Lz+7ef+y5hLoCkE9PYSth4/oP0+VDMD7ead3exz+jKa6gN6/2nVENB2+VhNQLt9Oa7qj4v7sdQf0NthfB0Bvfz2r9UEtP7nw9pn/U9/H/O1tP6A3s62LruxzwMdzyN21QT08m+Htc/L97sRl0BTCOh4KWPkE9GngF6fqgloszjsxtuXsUwhIComICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiKgqxwed7Wu45lpdRDQ1Wp56F4dBHQ1AX0koMu8fD88FHEXz/5X98/b1e7f63h+7LgEdJHDY9LW3Y/97HOYgVZ3P3f/UUECuszp+XqngI6P/hz5qXtVENBFXp+OrZwCWt8dny5nNSSgy2wWpzXQMaAKPq+nDgK63PLu5x9nIAR0jV05v6+BzD1HArrIYcZZn2agx+NR2H5KGnvHRiegy+wXPbtcjh/YczoP5CBMQIQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBETk/wD2qYxz4oZwLAAAAABJRU5ErkJggg==" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Aitchison" class="csl-entry">
+Aitchison, J. 1986. <em><span>T</span>he <span>S</span>tatistical
+<span>A</span>nalysis of <span>C</span>ompositional
+<span>D</span>ata</em>. Chapman &amp; Hall.
+</div>
+<div id="ref-VanDenBoogaart" class="csl-entry">
+Boogaart, K. G. van den, and R. Tolosana-Delgado. 2013. <em>Analyzing
+Compositional Data with r</em>. Berlin: Springer-Verlag.
+</div>
+<div id="ref-compositions" class="csl-entry">
+Boogaart, K. G. van den, R. Tolosana-Delgado, and M. Bren. 2024.
+<em>Compositions: Compositional Data Analysis</em>. <a href="https://CRAN.R-project.org/package=compositions">https://CRAN.R-project.org/package=compositions</a>.
+</div>
+<div id="ref-Cadrin" class="csl-entry">
+Cadrin, A. A. J., T. K. Kyser, W. G. E. Caldwell, and F. J. Longstaffe.
+1996. <span>“Isotopic and Chemical Compositions of Bentonites as
+Paleoenvironmental Indicators of the Cretaceous Western Interior
+Seaway.”</span> <em>Palaeogeography, Palaeoclimatology,
+Palaeoecology</em> 119 (3): 301–20. <a href="https://doi.org/10.1016/0031-0182(95)00015-1">https://doi.org/10.1016/0031-0182(95)00015-1</a>.
+</div>
+<div id="ref-Filzmoser" class="csl-entry">
+Filzmoser, P., K. Hron, and M. Templ. 2018. <em>Applied Compositional
+Data Analysis: With Worked Examples in r</em>. Cham, Switzerland:
+Springer.
+</div>
+<div id="ref-FrankKowalski" class="csl-entry">
+Frank, I. E., and B. R. Kowalski. 1984. <span>“Prediction of Wine
+Quality and Geographic Origin from Chemical Measurements by Partial
+Least-Squares Regression Modeling.”</span> <em>Analytica Chimica
+Acta</em> 162: 241–51. <a href="https://doi.org/10.1016/S0003-2670(00)84245-2">https://doi.org/10.1016/S0003-2670(00)84245-2</a>.
+</div>
+<div id="ref-Graffelman2005" class="csl-entry">
+Graffelman, J. 2005. <span>“Enriched Biplots for Canonical Correlation
+Analysis.”</span> <em>Journal of Applied Statistics</em> 32 (2): 173–88.
+</div>
+<div id="ref-Graffelman2021" class="csl-entry">
+———. 2021. <span>“Compositional Biplots: A Story of False Leads and
+Hidden Features Revealed by the Last Dimensions.”</span> In <em>Advances
+in Compositional Data Analysis: Festschrift in Honour of Vera
+Pawlowsky-Glahn</em>, edited by Peter Filzmoser, Karel Hron, Josep
+Antoni Martín-Fernández, and Javier Palarea-Albaladejo, 83–99. Cham:
+Springer International Publishing. <a href="https://doi.org/10.1007/978-3-030-71175-7_5">https://doi.org/10.1007/978-3-030-71175-7_5</a>.
+</div>
+<div id="ref-Graffelman2018" class="csl-entry">
+Graffelman, J., V. Pawlowsky-Glahn, J. J. Egozcue, and A. Buccianti.
+2018. <span>“Exploration of Geochemical Data with Compositional
+Canonical Biplots.”</span> <em>Journal of Geochemical Exploration</em>
+194: 120–33. <a href="https://doi.org/10.1016/j.gexplo.2018.07.014">https://doi.org/10.1016/j.gexplo.2018.07.014</a>.
+</div>
+<div id="ref-Greenacre" class="csl-entry">
+Greenacre, M. 2018. <em>Compositional Data Analysis in Practice</em>.
+Chapman &amp; Hall / CRC Press.
+</div>
+<div id="ref-easyCODA" class="csl-entry">
+———. 2024. <em>easyCODA: Compositional Data Analysis in Practice</em>.
+<a href="https://CRAN.R-project.org/package=easyCODA">https://CRAN.R-project.org/package=easyCODA</a>.
+</div>
+<div id="ref-zCompositions" class="csl-entry">
+Palarea-Albaladejo, J., and J. A. Martin-Fernandez. 2024.
+<em>zCompositions: Treatment of Zeros, Left-Censored and Missing Values
+in Compositional Data Sets</em>. <a href="https://CRAN.R-project.org/package=zCompositions">https://CRAN.R-project.org/package=zCompositions</a>.
+</div>
+<div id="ref-Pawlowsky" class="csl-entry">
+Pawlowsky-Glahn, V., J. J. Egozcue, and R. Tolosana-Delgado. 2015.
+<em>Modeling and Analysis of Compositional Data</em>. Chichester, United
+Kingdom: John Wiley &amp; Sons.
+</div>
+<div id="ref-Reyment" class="csl-entry">
+Reyment, R. A., and E. Savazzi. 1999. <em>Aspects of Multivariate
+Statistical Analysis in Geology</em>. Elsevier Science B.V., Amsterdam.
+<a href="https://doi.org/10.1016/B978-044482568-1/50012-4">https://doi.org/10.1016/B978-044482568-1/50012-4</a>.
+</div>
+<div id="ref-robCompositions" class="csl-entry">
+Templ, M., K. Hron, and P. et al. Filzmoser. 2024. <em>robCompositions:
+Compositional Data Analysis</em>. <a href="https://CRAN.R-project.org/package=robCompositions">https://CRAN.R-project.org/package=robCompositions</a>.
+</div>
+<div id="ref-Tubb" class="csl-entry">
+Tubb, A., A. J. Parker, and G. Nickless. 1980. <span>“The Analysis of
+Romano-British Pottery by Atomic Absorption Spectrophotometry.”</span>
+<em>Archaeometry</em> 22 (2): 153–71.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

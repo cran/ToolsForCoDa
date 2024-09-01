@@ -34,8 +34,8 @@ F.J. (1995) Isotopic and chemical compositions of bentonites as
 paleoenvironmental indicators of the Cretaceous Western Interior Seaway
 Palaeogeography, Palaeoclimatology, Palaeoecology 119 pp. 301--320.
   
-Reyment, R. A. and Savazzi, E. (1999) Aspects of Multivariate Statistical Analysis in Geology, Elsevier
-Science B.V., Amsterdam. https://doi.org/10.1016/B978-044482568-1/50012-4
+Reyment, R. A. and Savazzi, E. (1999) Aspects of Multivariate Statistical
+Analysis in Geology, Elsevier Science B.V., Amsterdam. 
 }
 \examples{
 data(bentonites)

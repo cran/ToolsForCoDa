@@ -27,7 +27,7 @@ lrpca(Xcom)
 }
 \author{ Jan Graffelman (jan.graffelman@upc.edu) }
 \seealso{
-  \code{\link{princomp}},
+  \code{\link{princomp}}
 }
 \examples{
 data(bentonites)
