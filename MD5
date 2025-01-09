@@ -1,4 +1,4 @@
-e3c9098d2e06a6cb47ff097206666580 *DESCRIPTION
+7cf67812552a8c876f2547dfe161983d *DESCRIPTION
 a6f1ca8c56d2dbc976202ffe35831a93 *NAMESPACE
 3d20278ee445e20e5e6ab65454b7c1f9 *R/canocov.R
 61c37942b47cbbc14e2c0bb55a797f7f *R/cen.R
@@ -6,8 +6,8 @@ a6f1ca8c56d2dbc976202ffe35831a93 *NAMESPACE
 7364fc5e454abfebc0bef6cfc44914fa *R/dens.mvnormSisI.R
 3dfd719d262422ede0e0a1ef8a093f4a *R/largest.kappas.R
 797d6188364fffbe73535368d29ce782 *R/lrcco.R
-a4027bf10bfa1c68b222deff784a791b *R/lrlda.R
-ca51332da03e5338a333b67861b7069c *R/lrpca.R
+d598bfc123e84b0ad8809a1ab76be176 *R/lrlda.R
+6b24c28fa59ebb82868a714dde13390c *R/lrpca.R
 5fe60d199cf9afff5270d7a0381659e2 *R/tab2vec.R
 c8acc6cdc31cd50ec0cb5c90a4389bfc *R/ternaryplot.R
 b4b272f6d12ab96fae1d7d4f25b978f3 *R/tr.R
@@ -18,9 +18,9 @@ c47f69ac5fec947d5ba171f12d0afbef *data/PinotNoir.rda
 b48a0f986e5a89d406f6cc78de1a8de4 *data/Tubb.rda
 6531417e1d520ffb0f7063c4874439e5 *data/bentonites.rda
 fb0bc05af8799e4d12d62355039df05c *inst/CITATION
-d3b7d74ca6f8f15ff661cc7a56519336 *inst/doc/ToolsForCoDa.R
-cf4636e1665d1755be91ca8ca0b5f980 *inst/doc/ToolsForCoDa.Rmd
-0a045c2e2d81e33ca8377759b856be62 *inst/doc/ToolsForCoDa.html
+bfef227e9520c54b71be55ec3f1f6d1e *inst/doc/ToolsForCoDa.R
+26eb13e70a5c54a76ad18094bbfff1fb *inst/doc/ToolsForCoDa.Rmd
+f23c070c8a216c12bf1b191031e00dc1 *inst/doc/ToolsForCoDa.html
 1f1d8c129c3766f35f586a1290fb3ce9 *man/Artificial.Rd
 7551278b42d61319b167381e9418c988 *man/PinotNoir.Rd
 c23550e28aed99ef012532f653a9b2f3 *man/Tubb.Rd
@@ -34,5 +34,5 @@ c64bb8185a126490b1855d33ade17f30 *man/lrcco.Rd
 4297a104d6f3dd8a66ce03aefcdd9277 *man/lrpca.Rd
 225b67e3159e1902e0d868868fd47869 *man/ternaryplot.Rd
 a83982ce645a8a2ba57bdab60a737035 *man/tr.Rd
-cf4636e1665d1755be91ca8ca0b5f980 *vignettes/ToolsForCoDa.Rmd
+26eb13e70a5c54a76ad18094bbfff1fb *vignettes/ToolsForCoDa.Rmd
 917c2c716147a80444117e70de762bbb *vignettes/ToolsForCoDa.bib

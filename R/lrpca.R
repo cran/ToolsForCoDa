@@ -1,5 +1,4 @@
-lrpca <- function (Xcom) 
-{
+lrpca <- function (Xcom) {
     n <- nrow(Xcom)
     p <- ncol(Xcom)
     Xl <- log(Xcom)
@@ -13,15 +12,16 @@ lrpca <- function (Xcom)
     laf <- la/sum(la)
     lac <- cumsum(laf)
     decom <- rbind(la, laf, lac)
-    colnames(decom) <- paste("PC", 1:p, sep = "")
+    nc <- min(n,p)
+    colnames(decom) <- paste("PC", 1:nc, sep = "")
     Fp <- sqrt(n) * U %*% D
     Gs <- V
     Fs <- sqrt(n) * U
     Gp <- V %*% D
-    colnames(Fp) <- paste("PC", 1:p, sep = "")
-    colnames(Fs) <- paste("PC", 1:p, sep = "")
-    colnames(Gp) <- paste("PC", 1:p, sep = "")
-    colnames(Gs) <- paste("PC", 1:p, sep = "")
+    colnames(Fp) <- paste("PC", 1:nc, sep = "")
+    colnames(Fs) <- paste("PC", 1:nc, sep = "")
+    colnames(Gp) <- paste("PC", 1:nc, sep = "")
+    colnames(Gs) <- paste("PC", 1:nc, sep = "")
     casenames <- rownames(Xcom)
     if (!is.null(casenames)) {
         rownames(Fp) <- casenames
@@ -37,7 +37,7 @@ lrpca <- function (Xcom)
     cn <- round(cn, digits = 2)
     lac <- round(lac, digits = 4)
     pc <- 1:length(lac)
-    Gs <- Gs[, 1:(p - 1)]
+    Gs <- Gs[, 1:(nc - 1)]
     Gss <- round(Gs, digits = 2)
     kappalist <- data.frame(pc, cn, lac, t(Gss))
     i <- order(cn, decreasing = TRUE)

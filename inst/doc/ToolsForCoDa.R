@@ -236,6 +236,13 @@ points(LD[,1],LD[,2],col=colvec)
 origin()
 arrows(0,0,10*Gs[,1],10*Gs[,2],angle = 10, length = 0.1)
 textxy(10*Gs[,1],10*Gs[,2],colnames(Oxides))
+
+ld1lab <- paste("LD1 (",toString(round(100*out.lrlda$decom[2,1],1)),"%)",sep="")
+ld2lab <- paste("LD2 (",toString(round(100*out.lrlda$decom[2,2],1)),"%)",sep="")
+
+text(7,-0.25,ld1lab,cex=0.75)
+text(0.25,7,ld2lab,cex=0.75,srt=90)
+
 par(opar)
 legend("topleft",c("G","NF","W"),col=c("red","green","blue"),pch=1,cex=0.5)
 

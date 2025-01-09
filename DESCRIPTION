@@ -1,8 +1,8 @@
 Package: ToolsForCoDa
 Type: Package
 Title: Multivariate Tools for Compositional Data Analysis
-Version: 1.0.9
-Date: 2024-09-01
+Version: 1.1.0
+Date: 2025-01-09
 Authors@R: c(person("Jan", "Graffelman", role = c("aut", "cre"), email = "jan.graffelman@upc.edu"))
 Author: Jan Graffelman [aut, cre]
 Maintainer: Jan Graffelman <jan.graffelman@upc.edu>
@@ -12,7 +12,7 @@ License: GPL (>= 2)
 URL: https://www.r-project.org, http://www-eio.upc.edu/~jan/
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
-Packaged: 2024-09-01 17:09:07 UTC; TanitSunShine
+Packaged: 2025-01-09 10:32:12 UTC; TanitSunShine
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2024-09-01 17:50:02 UTC
+Date/Publication: 2025-01-09 11:00:05 UTC
